@@ -19,6 +19,44 @@ namespace MoviesApp.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("MoviesApp.Models.Acter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("BirthdayDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Acters");
+                });
+
+            modelBuilder.Entity("MoviesApp.Models.ActerMovie", b =>
+                {
+                    b.Property<int>("ActerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ActerId", "MovieId");
+
+                    b.HasIndex("MovieId");
+
+                    b.ToTable("ActerMovies");
+                });
+
             modelBuilder.Entity("MoviesApp.Models.Movie", b =>
                 {
                     b.Property<int>("Id")
@@ -41,6 +79,21 @@ namespace MoviesApp.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Movies");
+                });
+
+            modelBuilder.Entity("MoviesApp.Models.ActerMovie", b =>
+                {
+                    b.HasOne("MoviesApp.Models.Acter", "Acter")
+                        .WithMany("ActersList")
+                        .HasForeignKey("ActerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MoviesApp.Models.Movie", "Movie")
+                        .WithMany("MoviesList")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
