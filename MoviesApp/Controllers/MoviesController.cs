@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,9 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var viewModel = _context.Movies.Where(m => m.Id == id).Select(m => new MovieViewModel
+            var viewModel = _context.Movies
+                .Where(m => m.Id == id)
+                .Select(m => new MovieViewModel
             {
                 Id = m.Id,
                 Genre = m.Genre,
