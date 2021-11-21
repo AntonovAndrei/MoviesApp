@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MoviesApp.Data;
@@ -109,6 +110,15 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
+            
+            var moviesList = _context.Movies.Select(m => new
+            {
+                Id = m.Id,
+                Title = m.Title
+            }).ToList();
+            
+            ViewBag.MoviesSelectList = new SelectList(moviesList, "Id", "Title");
+            
             return View(editModel);
         }
 
