@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +59,17 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
+            var acterMoviesList = _context.ActerMovies.Where(m => m.ActerId == id)
+                .Select(m => new InputMovieViewModel()
+                {
+                    Genre = m.Movie.Genre,
+                    Price = m.Movie.Price,
+                    Title = m.Movie.Title,
+                    ReleaseDate = m.Movie.ReleaseDate
+                })
+                .ToList();
+            ViewBag.ActerMoviesSelectedList = acterMoviesList;
+
             return View(viewModel);
         }
         
@@ -109,14 +121,23 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
+            // Все хуйня Миша, переделывай
+            var acterMovie = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => m.MovieId).Distinct().ToList();
 
-            
-            var moviesList = _context.Movies.Select(m => new
+            List<ActerMovieViewModel> moviesList = null;
+
+            foreach (var a in acterMovie)
             {
-                Id = m.Id,
-                Title = m.Title
-            }).ToList();
-            
+                moviesList = _context.Movies
+                    .Where(m => m.Id == a)
+                    .Select(m => new ActerMovieViewModel()
+                    {
+                        Id = m.Id,
+                        Title = m.Title
+                    }).ToList();
+            }
+
+
             ViewBag.MoviesSelectList = new SelectList(moviesList, "Id", "Title");
             
             return View(editModel);
@@ -124,7 +145,7 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate")] EditActerViewModel editModel)
+        public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate")] EditActerViewModel editModel, int[] movieId)
         {
             if (ModelState.IsValid)
             {
@@ -151,6 +172,20 @@ namespace MoviesApp.Controllers
                     {
                         throw;
                     }
+                }
+
+                if (movieId.Length > 0)
+                {
+                    foreach (var m in movieId)
+                    {
+                        _context.Add(new ActerMovie
+                            {
+                                MovieId = m, 
+                                ActerId = id
+                            });
+                    }
+
+                    _context.SaveChanges();
                 }
 
                 return RedirectToAction(nameof(Index));

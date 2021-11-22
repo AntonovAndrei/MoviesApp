@@ -7,7 +7,7 @@ namespace MoviesApp.Models
         public int ActerId { get; set; }
         public virtual Acter Acter { get; set; }
         
-        //зачем делать виртуальными?
+        
         public int MovieId { get; set; }
         public virtual Movie Movie { get; set; }
     }

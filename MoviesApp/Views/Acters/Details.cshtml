@@ -18,10 +18,10 @@
         </dd>
         <dt class = "col-sm-2">
             <label asp-for="LastName"></label>
-            </dt>
+        </dt>
         <dd class = "col-sm-10">
             @Model.LastName
-            </dd>
+        </dd>
         <dt class = "col-sm-2">
             <label asp-for="BirthdayDate"></label>
         </dt>
@@ -30,6 +30,44 @@
         </dd>
     </dl>
 </div>
+<h4>Movies</h4>
+<table class="table">
+            <thead>
+            <tr>
+                <th>
+                    <label>Title</label>
+                </th>
+                <th>
+                     <label>ReleaseDate</label>
+                </th>
+                <th>
+                    <label>Genre</label>
+                </th>
+                <th>
+                    <label>Price</label>
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in ViewBag.ActerMoviesSelectedList) {
+                <tr>
+                    <td>
+                        @item.Title
+                    </td>
+                    <td>
+                        @item.ReleaseDate.ToString("dd.MM.yyyy")
+                    </td>
+                    <td>
+                        @item.Genre
+                    </td>
+                    <td>
+                        @item.Price
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
