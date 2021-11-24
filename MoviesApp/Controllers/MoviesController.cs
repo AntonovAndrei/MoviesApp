@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -127,19 +128,36 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
             
-            var movieActer = _context.ActerMovies.Where(a => a.MovieId == id).Select(m => m.ActerId).Distinct().ToList();
-
-            List<MovieActerViewModel> actersList = null;
-
-            foreach (var m in movieActer)
+            var movieActerList = _context.ActerMovies.Where(a => a.MovieId == id).Select(m => new MovieActerViewModel()
             {
-                actersList = _context.Acters
-                    .Where(a => a.Id == m)
-                    .Select(m => new MovieActerViewModel()
+                Id = m.Acter.Id,
+                Name = m.Acter.Name
+            }).ToList();
+
+            var actersList = _context.Acters
+                .Select(m => new MovieActerViewModel
+                {
+                    Id = m.Id,
+                    Name = m.Name
+                }).ToList();
+            
+            var buffer = new MovieActerViewModel();
+            foreach (var a in movieActerList)
+            {
+                foreach (var m in actersList)
+                {
+                    if (a.CompareTo(m) == 0)
                     {
-                        Id = m.Id,
-                        Name = $"{m.Name} {m.LastName}"
-                    }).ToList();
+                        buffer = m;
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    actersList.Remove(buffer);
+                    //Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
+                    buffer = null;
+                }
             }
 
 
@@ -153,8 +171,18 @@ namespace MoviesApp.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price")] EditMovieViewModel editModel, int[] acterId)
+        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, int[] acterId)
         {
+            if (editModel.IsDeleteAllActer)
+            {
+                var deleteActer = _context.ActerMovies.Where(m => m.MovieId == id).ToList();
+                foreach (var am in deleteActer)
+                {
+                    _context.Remove(am);
+                }
+
+                _context.SaveChanges();
+            }
             if (ModelState.IsValid)
             {
                 try

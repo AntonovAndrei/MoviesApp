@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -121,23 +122,41 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-            // Все хуйня Миша, переделывай
-            var acterMovie = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => m.MovieId).Distinct().ToList();
 
-            List<ActerMovieViewModel> moviesList = null;
-
-            foreach (var a in acterMovie)
+            
+            var acterMovieList = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => new ActerMovieViewModel
             {
-                moviesList = _context.Movies
-                    .Where(m => m.Id == a)
-                    .Select(m => new ActerMovieViewModel()
+                Id = m.Movie.Id,
+                Title = m.Movie.Title
+            }).ToList();
+
+            var moviesList = _context.Movies
+                .Select(m => new ActerMovieViewModel
+            {
+                Id = m.Id,
+                Title = m.Title
+            }).ToList();
+
+            //Спросить как сделать по человечески
+            var buffer = new ActerMovieViewModel();
+            foreach (var a in acterMovieList)
+            {
+                foreach (var m in moviesList)
+                {
+                    if (a.CompareTo(m) == 0)
                     {
-                        Id = m.Id,
-                        Title = m.Title
-                    }).ToList();
+                        buffer = m;
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    moviesList.Remove(buffer);
+                    //Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Title}");
+                    buffer = null;
+                }
             }
-
-
+            
             ViewBag.MoviesSelectList = new SelectList(moviesList, "Id", "Title");
             
             return View(editModel);
@@ -145,8 +164,18 @@ namespace MoviesApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate")] EditActerViewModel editModel, int[] movieId)
+        public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate,IsDeleteAllMovies")] EditActerViewModel editModel, int[] movieId)
         {
+            if (editModel.IsDeleteAllMovies)
+            {
+                var deleteMovie = _context.ActerMovies.Where(m => m.ActerId == id).ToList();
+                foreach (var am in deleteMovie)
+                {
+                    _context.Remove(am);
+                }
+
+                _context.SaveChanges();
+            }
             if (ModelState.IsValid)
             {
                 try

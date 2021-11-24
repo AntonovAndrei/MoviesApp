@@ -33,9 +33,13 @@
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label  class="control-label"> Movies </label>
-                @Html.DropDownList("movieId", ViewBag.ActersSelectList as SelectList,  new { multiple = "multiple", @class ="form-select"})
-                </div>
+                <label  class="control-label"> Acters </label>
+                @Html.DropDownList("acterId", ViewBag.ActersSelectList as SelectList,  new { multiple = "multiple", @class ="form-select"})
+            </div>
+            <div class="form-group">
+                <label  class="control-label"> Remove all acters </label>
+                <input asp-for="@Model.IsDeleteAllActer" />
+            </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
