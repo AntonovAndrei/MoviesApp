@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MoviesApp.Data;
+using MoviesApp.Middleware;
 
 namespace MoviesApp
 {
@@ -39,7 +40,10 @@ namespace MoviesApp
         {
             if (env.IsDevelopment())
             {
+                app.UseActerLogging();
+                app.UseRequestLog();
                 app.UseDeveloperExceptionPage();
+
             }
 
             app.UseHttpsRedirection();
@@ -48,8 +52,7 @@ namespace MoviesApp
             app.UseRouting();
 
             app.UseAuthorization();
-            
-            
+
             IList<CultureInfo> supportedCultures = new[]
             {
                 new CultureInfo("en-US"),
