@@ -138,8 +138,7 @@ namespace MoviesApp.Controllers
                 Id = m.Id,
                 Title = m.Title
             }).ToList();
-
-            //Спросить как сделать по человечески
+            
             var buffer = new ActerMovieViewModel();
             foreach (var a in acterMovieList)
             {
@@ -148,18 +147,19 @@ namespace MoviesApp.Controllers
                     if (a.CompareTo(m) == 0)
                     {
                         buffer = m;
+                        break;
                     }
                 }
 
                 if (buffer != null)
                 {
                     moviesList.Remove(buffer);
-                    //Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Title}");
                     buffer = null;
                 }
             }
-            
-            ViewBag.MoviesSelectList = new SelectList(moviesList, "Id", "Title");
+
+            editModel.SelectMovies = moviesList;
+            //ViewBag.MoviesSelectList = new SelectList(moviesList, "Id", "Title");
             
             return View(editModel);
         }
@@ -169,16 +169,6 @@ namespace MoviesApp.Controllers
         [ActorAgeFilter]
         public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate,IsDeleteAllMovies")] EditActerViewModel editModel, int[] movieId)
         {
-            if (editModel.IsDeleteAllMovies)
-            {
-                var deleteMovie = _context.ActerMovies.Where(m => m.ActerId == id).ToList();
-                foreach (var am in deleteMovie)
-                {
-                    _context.Remove(am);
-                }
-
-                _context.SaveChanges();
-            }
             if (ModelState.IsValid)
             {
                 try
@@ -205,8 +195,19 @@ namespace MoviesApp.Controllers
                         throw;
                     }
                 }
+                
+                if (editModel.IsDeleteAllMovies)
+                {
+                    var deleteMovie = _context.ActerMovies.Where(m => m.ActerId == id).ToList();
+                    foreach (var am in deleteMovie)
+                    {
+                        _context.Remove(am);
+                    }
 
-                if (movieId.Length > 0)
+                    _context.SaveChanges();
+                }
+
+                if (movieId.Length != 0)
                 {
                     foreach (var m in movieId)
                     {
