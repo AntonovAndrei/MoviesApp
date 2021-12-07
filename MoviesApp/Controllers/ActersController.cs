@@ -126,40 +126,7 @@ namespace MoviesApp.Controllers
             }
 
             
-            var acterMovieList = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => new ActerMovieViewModel
-            {
-                Id = m.Movie.Id,
-                Title = m.Movie.Title
-            }).ToList();
-
-            var moviesList = _context.Movies
-                .Select(m => new ActerMovieViewModel
-            {
-                Id = m.Id,
-                Title = m.Title
-            }).ToList();
-            
-            var buffer = new ActerMovieViewModel();
-            foreach (var a in acterMovieList)
-            {
-                foreach (var m in moviesList)
-                {
-                    if (a.CompareTo(m) == 0)
-                    {
-                        buffer = m;
-                        break;
-                    }
-                }
-
-                if (buffer != null)
-                {
-                    moviesList.Remove(buffer);
-                    buffer = null;
-                }
-            }
-
-            editModel.SelectMovies = moviesList;
-            //ViewBag.MoviesSelectList = new SelectList(moviesList, "Id", "Title");
+            editModel.SelectMovies = ActersNotFilmedFilms(id);
             
             return View(editModel);
         }
@@ -167,7 +134,7 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActorAgeFilter]
-        public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate,IsDeleteAllMovies")] EditActerViewModel editModel, int[] movieId)
+        public IActionResult Edit(int id, [Bind("Name, LastName, BirthdayDate,IsDeleteAllMovies")] EditActerViewModel editModel, List<int> movieId)
         {
             if (ModelState.IsValid)
             {
@@ -207,7 +174,7 @@ namespace MoviesApp.Controllers
                     _context.SaveChanges();
                 }
 
-                if (movieId.Length != 0)
+                if (movieId.Count > 0)
                 {
                     foreach (var m in movieId)
                     {
@@ -223,6 +190,8 @@ namespace MoviesApp.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+            
+            editModel.SelectMovies = ActersNotFilmedFilms(id);;
 
             return View(editModel);
         }
@@ -264,6 +233,43 @@ namespace MoviesApp.Controllers
         private bool ActerExists(int id)
         {
             return _context.Acters.Any(a => a.Id == id);
+        }
+
+        private List<ActerMovieViewModel> ActersNotFilmedFilms(int? id= -1)
+        {
+            var acterMovieList = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => new ActerMovieViewModel
+            {
+                Id = m.Movie.Id,
+                Title = m.Movie.Title
+            }).ToList();
+
+            var moviesList = _context.Movies
+                .Select(m => new ActerMovieViewModel
+                {
+                    Id = m.Id,
+                    Title = m.Title
+                }).ToList();
+            
+            var buffer = new ActerMovieViewModel();
+            foreach (var a in acterMovieList)
+            {
+                foreach (var m in moviesList)
+                {
+                    if (a.CompareTo(m) == 0)
+                    {
+                        buffer = m;
+                        break;
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    moviesList.Remove(buffer);
+                    buffer = null;
+                }
+            }
+
+            return moviesList;
         }
     }
 }

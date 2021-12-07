@@ -88,3 +88,5 @@ C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\obj\Debug\netcoreapp3.
 C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\obj\Debug\netcoreapp3.1\Razor\Views\Acters\Details.cshtml.g.cs
 C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\obj\Debug\netcoreapp3.1\Razor\Views\Acters\Edit.cshtml.g.cs
 C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\obj\Debug\netcoreapp3.1\Razor\Views\Acters\Index.cshtml.g.cs
+C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\bin\Debug\netcoreapp3.1\AutoMapper.dll
+C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\bin\Debug\netcoreapp3.1\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

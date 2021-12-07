@@ -34,7 +34,7 @@
                 @Html.DropDownList("movieId", ViewBag.MoviesSelectList as MultiSelectList, new {multiple = "multiple", @class = "form-select"})
                 </div>*@
             @*Не работает с кастомной валидацией на имя и фамилию*@
-            @*<div class="form-group">
+            <div class="form-group">
                 <label class="control-label"> Movies </label>
                 <select name="movieId" multiple>
                 @foreach (var m in Model.SelectMovies)
@@ -42,11 +42,7 @@
                         <option value="@m.Id">@m.Title</option>
                 }
                 </select>
-                </div>*@
-            <div class="form-group">
-                <label class="control-label"> Movies </label>
-                <select asp-for=""
-            </div>
+                </div>
             <div class="form-group">
                 <label  class="control-label"> Remove all movies </label>
                 <input asp-for="@Model.IsDeleteAllMovies" />

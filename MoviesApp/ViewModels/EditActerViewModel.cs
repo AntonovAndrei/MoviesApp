@@ -8,8 +8,6 @@ namespace MoviesApp.ViewModels
         public bool IsDeleteAllMovies { get; set; }
         
         //Лучше использовать IEnumerable или ICollection?
-        public ICollection<ActerMovieViewModel> SelectMovies { get; set; }
-        //Indian method
-        public int 
+        public IEnumerable<ActerMovieViewModel> SelectMovies { get; set; }
     }
 }
