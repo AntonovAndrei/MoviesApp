@@ -1,6 +1,7 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -16,26 +17,22 @@ namespace MoviesApp.Controllers
     {
         private readonly MoviesContext _context;
         private readonly ILogger<HomeController> _logger;
+        private readonly Mapper _mapper;
 
 
-        public MoviesController(MoviesContext context, ILogger<HomeController> logger)
+        public MoviesController(MoviesContext context, ILogger<HomeController> logger, Mapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // GET: Movies
         [HttpGet]
         public IActionResult Index()
         {
-            return View(_context.Movies.Select(m => new MovieViewModel
-            {
-                Id = m.Id,
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).ToList());
+            var movies = _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieViewModel>>(_context.Movies.ToList());
+            return View(movies);
         }
 
         // GET: Movies/Details/5
@@ -47,17 +44,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var viewModel = _context.Movies
-                .Where(m => m.Id == id)
-                .Select(m => new MovieViewModel
-            {
-                Id = m.Id,
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
-
+            var viewModel = _mapper.Map<Movie, MovieViewModel>(_context.Movies.Where(m => m.Id == id).FirstOrDefault());
             
             if (viewModel == null)
             {
@@ -156,8 +143,7 @@ namespace MoviesApp.Controllers
 
                 if (buffer != null)
                 {
-                    actersList.Remove(buffer);
-                    //Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
+                    actersList.Remove(buffer);//Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
                     buffer = null;
                 }
             }

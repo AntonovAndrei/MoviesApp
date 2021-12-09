@@ -9,8 +9,8 @@ using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
 {
-    //[Route("api/acters")]
-    [Route("api/[controller]/[action]", Name = "[controller]_[action]")]
+    [Route("api/acters")]
+    //[Route("api/[controller]/[action]", Name = "[controller]_[action]")]
     [ApiController]
     public class ActersApiController:ControllerBase
     {
@@ -33,7 +33,7 @@ namespace MoviesApp.Controllers
         }
         
         
-        [HttpGet("{id}")] // GET: /api/acters
+        [HttpGet("withMovies/{id}")] // GET: /api/acters
         //[Route("api/acters/withMovies/{id}")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<ActerViewModel>))]  
         [ProducesResponseType(404)]
