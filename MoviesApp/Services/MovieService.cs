@@ -33,8 +33,6 @@ namespace MoviesApp.Services
         {
             if (movieDto.Id == null)
             {
-                //упрощение для примера
-                //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                 return null;
             }
             
@@ -51,14 +49,10 @@ namespace MoviesApp.Services
             {
                 if (!MovieExists((int) movieDto.Id))
                 {
-                    //упрощение для примера
-                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                     return null;
                 }
                 else
                 {
-                    //упрощение для примера
-                    //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                     return null;
                 }
             }
@@ -76,8 +70,6 @@ namespace MoviesApp.Services
             var movie = _context.Movies.Find(id);
             if (movie == null)
             {
-                //упрощение для примера
-                //лучше всего генерировать ошибки и обрабатывать их на уровне конроллера
                 return null;
             }
 
