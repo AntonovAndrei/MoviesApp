@@ -12,7 +12,7 @@ using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
 {
-    public class ActersController : Controller
+    public partial class ActersController : Controller
     {
         private readonly MoviesContext _context;
         //спросить про MoviesController ILogger

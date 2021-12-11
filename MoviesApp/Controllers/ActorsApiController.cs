@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MoviesApp.Data;
 using MoviesApp.Models;
+using MoviesApp.Services;
+using MoviesApp.Services.Dto;
 using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
@@ -14,12 +18,14 @@ namespace MoviesApp.Controllers
     [ApiController]
     public class ActersApiController:ControllerBase
     {
-        private readonly MoviesContext _context;
+        private readonly ILogger<HomeController> _logger;
+        private readonly IActorService _service;
         private readonly IMapper _mapper;
 
-        public ActersApiController(MoviesContext context, IMapper mapper)
+        public ActersApiController(IMapper mapper, IActorService service, ILogger<HomeController> logger)
         {
-            _context = context;
+            _logger = logger;
+            _service = service;
             _mapper = mapper;
         }
 
@@ -28,7 +34,7 @@ namespace MoviesApp.Controllers
         [ProducesResponseType(404)]
         public ActionResult<IEnumerable<ActerViewModel>> GetActers()
         {
-            var acters = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerViewModel>>(_context.Acters.ToList());
+            var acters = _mapper.Map<IEnumerable<ActerDto>, IEnumerable<ActerViewModel>>(_service.GetAllActors());
             return Ok(acters);
         }
         
@@ -39,14 +45,9 @@ namespace MoviesApp.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetActerWithMovies(int id)
         {
-            var acter = _mapper.Map<EditActerViewModel>(_context.Acters.FirstOrDefault(m => m.Id == id));
-            if (acter == null) return NotFound();  
-            var acterMovieList = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => new ActerMovieViewModel
-            {
-                Id = m.Movie.Id,
-                Title = m.Movie.Title
-            }).ToList();
-            acter.SelectMovies = acterMovieList;
+            var acter = _mapper.Map<EditActerViewModel>(_service.GetActor(id));
+            if (acter == null) return NotFound();
+            acter.SelectMovies = _mapper.Map<IEnumerable<MovieDto>,IEnumerable<ActerMovieViewModel>>(_service.GetAllMoviesByActorId(id));
             return Ok(acter);
         }
         
@@ -55,7 +56,7 @@ namespace MoviesApp.Controllers
         [ProducesResponseType(404)]
         public IActionResult GetById(int id)
         {
-            var acter = _mapper.Map<ActerViewModel>(_context.Acters.FirstOrDefault(m => m.Id == id));
+            var acter = _mapper.Map<ActerViewModel>(_service.GetActor(id));
             if (acter == null) return NotFound();  
             return Ok(acter);
         }
@@ -63,9 +64,8 @@ namespace MoviesApp.Controllers
         [HttpPost] // POST: api/acters
         public ActionResult<InputActerViewModel> PostActer(InputActerViewModel inputModel)
         {
-            
-            var acter = _context.Add(_mapper.Map<Acter>(inputModel)).Entity;
-            _context.SaveChanges();
+
+            var addedActer = _service.AddActor(_mapper.Map<InputActerViewModel, ActerDto>(inputModel));
 
             return CreatedAtAction("GetById", new { id = acter.Id }, _mapper.Map<InputActerViewModel>(inputModel));
         }
