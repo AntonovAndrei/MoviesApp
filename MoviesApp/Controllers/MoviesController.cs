@@ -1,28 +1,29 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MoviesApp.Data;
 using MoviesApp.Filters;
 using MoviesApp.Models;
+using MoviesApp.Services;
+using MoviesApp.Services.Dto;
 using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
 {
     public class MoviesController: Controller
     {
-        private readonly MoviesContext _context;
+        private readonly IMovieService _service;
+        private readonly IActorService _actorService;
         private readonly ILogger<HomeController> _logger;
         private readonly Mapper _mapper;
 
 
-        public MoviesController(MoviesContext context, ILogger<HomeController> logger, Mapper mapper)
+        public MoviesController(IActorService actorService, IMovieService service, ILogger<HomeController> logger, Mapper mapper)
         {
-            _context = context;
+            _actorService = actorService;
+            _service = service;
             _logger = logger;
             _mapper = mapper;
         }
@@ -31,7 +32,7 @@ namespace MoviesApp.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var movies = _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieViewModel>>(_context.Movies.ToList());
+            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_service.GetAllMovies());
             return View(movies);
         }
 
@@ -43,23 +44,16 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-
-            var viewModel = _mapper.Map<Movie, MovieViewModel>(_context.Movies.Where(m => m.Id == id).FirstOrDefault());
             
+            var viewModel = _mapper.Map<MovieViewModel>(_service.GetMovie((int) id));
+
             if (viewModel == null)
             {
                 return NotFound();
             }
             
-            var movieActersList = _context.ActerMovies.Where(m => m.MovieId == id)
-                .Select(m => new InputActerViewModel()
-                {
-                    Name = m.Acter.Name,
-                    LastName = m.Acter.LastName,
-                    BirthdayDate = m.Acter.BirthdayDate,
-                })
-                .ToList();
-            ViewBag.MovieActersSelectedList = movieActersList;
+            ViewBag.MovieActersSelectedList = _mapper.Map<IEnumerable<ActerDto>, IEnumerable<InputActerViewModel>>
+                (_actorService.GetAllActorByMovieId((int) id));
 
             return View(viewModel);
         }
@@ -81,15 +75,7 @@ namespace MoviesApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(new Movie
-                {
-                    Genre = inputModel.Genre,
-                    Price = inputModel.Price,
-                    Title = inputModel.Title,
-                    ReleaseDate = inputModel.ReleaseDate
-                });
-                _context.SaveChanges();
-
+                _service.AddMovie(_mapper.Map<MovieDto>(inputModel));
                 return RedirectToAction(nameof(Index));
             }
             return View(inputModel);
@@ -104,52 +90,14 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var editModel = _context.Movies.Where(m => m.Id == id).Select(m => new EditMovieViewModel
-            {
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
+            var editModel = _mapper.Map<EditMovieViewModel>(_service.GetMovie((int) id));
             
             if (editModel == null)
             {
                 return NotFound();
             }
             
-            var movieActerList = _context.ActerMovies.Where(a => a.MovieId == id).Select(m => new MovieActerViewModel()
-            {
-                Id = m.Acter.Id,
-                Name = m.Acter.Name
-            }).ToList();
-
-            var actersList = _context.Acters
-                .Select(m => new MovieActerViewModel
-                {
-                    Id = m.Id,
-                    Name = m.Name
-                }).ToList();
-            
-            var buffer = new MovieActerViewModel();
-            foreach (var a in movieActerList)
-            {
-                foreach (var m in actersList)
-                {
-                    if (a.CompareTo(m) == 0)
-                    {
-                        buffer = m;
-                    }
-                }
-
-                if (buffer != null)
-                {
-                    actersList.Remove(buffer);//Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
-                    buffer = null;
-                }
-            }
-
-
-            ViewBag.ActersSelectList = new SelectList(actersList, "Id", "Name");
+            ViewBag.ActersSelectList = new SelectList(_actorService.GetNotFilmedActersByMovieId((int) id), "Id", "Name");
 
             return View(editModel);
         }
@@ -160,33 +108,18 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
-        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, int[] acterId)
+        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, int[] acterIds)
         {
             if (editModel.IsDeleteAllActer)
             {
-                var deleteActer = _context.ActerMovies.Where(m => m.MovieId == id).ToList();
-                foreach (var am in deleteActer)
-                {
-                    _context.Remove(am);
-                }
-
-                _context.SaveChanges();
+                _service.DeleteAllActorsFilmedInMovies(id);
             }
+            //так нужно обрабатывать все ошибки выкидываемые сервисом?
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var movie = new Movie
-                    {
-                        Id = id,
-                        Genre = editModel.Genre,
-                        Price = editModel.Price,
-                        Title = editModel.Title,
-                        ReleaseDate = editModel.ReleaseDate
-                    };
-                    
-                    _context.Update(movie);
-                    _context.SaveChanges();
+                    _service.UpdateMovie(_mapper.Map<EditMovieViewModel, MovieDto>(editModel));
                 }
                 catch (DbUpdateException)
                 {
@@ -200,18 +133,12 @@ namespace MoviesApp.Controllers
                     }
                 }
 
-                if (acterId.Length > 0)
+                if (acterIds.Length > 0)
                 {
-                    foreach (var a in acterId)
+                    foreach (var a in acterIds)
                     {
-                        _context.Add(new ActerMovie
-                        {
-                            MovieId = id, 
-                            ActerId = a
-                        });
+                        
                     }
-
-                    _context.SaveChanges();
                 }
                 
                 return RedirectToAction(nameof(Index));

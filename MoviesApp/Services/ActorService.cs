@@ -81,11 +81,49 @@ namespace MoviesApp.Services
             return _mapper.Map<ActerDto>(actor);
         }
 
-        public IEnumerable<MovieDto> GetAllMoviesByActorId(int id)
+        
+        
+        public IEnumerable<ActerDto> GetAllActorByMovieId(int id)
         {
-            return _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDto>>
-            (_context.ActerMovies.Where(m => m.ActerId == id)
-                .Select(m => m.Movie).ToList());        }
+            return _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDto>>
+            (_context.ActerMovies.Where(m => m.MovieId == id)
+                .Select(m => m.Acter).ToList());
+        }
+
+        public IEnumerable<ActerDtoForMovies> GetNotFilmedActersByMovieId(int id)
+        {
+            var movieActersList = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDtoForMovies>>
+                (_context.ActerMovies.Where(a => a.MovieId == id).Select(a => a.Acter).ToList());
+
+            /*var actersList = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDtoForMovies>>
+                (_context.ActerMovies.Select(a => a.Acter).ToList());
+                */
+
+            //Сделанно, чтобы юзать метод Remove
+            //скорее всего есть метод получше
+            var actersList = _mapper.Map<List<Acter>, List<ActerDtoForMovies>>
+                (_context.ActerMovies.Select(a => a.Acter).ToList());
+            
+            var buffer = new ActerDtoForMovies();
+            foreach (var a in movieActersList)
+            {
+                foreach (var m in actersList)
+                {
+                    if (a.CompareTo(m))
+                    {
+                        buffer = m;
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    actersList.Remove(buffer);//Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
+                    buffer = null;
+                }
+            }
+
+            return actersList;
+        }
         
         private bool ActorExists(int id)
         {

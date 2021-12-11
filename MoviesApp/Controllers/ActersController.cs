@@ -126,7 +126,7 @@ namespace MoviesApp.Controllers
             }
 
             
-            editModel.SelectMovies = ActersNotFilmedFilms(id);
+            editModel.SelectMovies = ActersNotFilmedFilms((int) id);
             
             return View(editModel);
         }
@@ -235,7 +235,7 @@ namespace MoviesApp.Controllers
             return _context.Acters.Any(a => a.Id == id);
         }
 
-        private List<ActerMovieViewModel> ActersNotFilmedFilms(int? id= -1)
+        private List<ActerMovieViewModel> ActersNotFilmedFilms(int id)
         {
             var acterMovieList = _context.ActerMovies.Where(a => a.ActerId == id).Select(m => new ActerMovieViewModel
             {

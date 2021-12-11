@@ -11,5 +11,11 @@ namespace MoviesApp.Services.Dto
         [StringLength(32,ErrorMessage = "Name length can't be more than 32.")]
         [ActorName]
         public string Name { get; set; }
+
+
+        public bool CompareTo(ActerDtoForMovies acterDtoForMovies)
+        {
+            return this.Id == acterDtoForMovies.Id;
+        }
     }
 }
