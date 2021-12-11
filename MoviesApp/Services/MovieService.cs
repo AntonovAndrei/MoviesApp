@@ -86,6 +86,40 @@ namespace MoviesApp.Services
                 .Select(m => m.Acter).ToList());
         }
 
+        public IEnumerable<ActerDto> GetNotFilmedActersByMovieId(int id)
+        {
+            var movieActersList = _context.ActerMovies.Where(a => a.MovieId == id).Select(m => new MovieActerViewModel()
+            {
+                Id = m.Acter.Id,
+                Name = m.Acter.Name
+            }).ToList();
+
+            var actersList = _context.Acters
+                .Select(m => new MovieActerViewModel
+                {
+                    Id = m.Id,
+                    Name = m.Name
+                }).ToList();
+            
+            var buffer = new MovieActerViewModel();
+            foreach (var a in movieActersList)
+            {
+                foreach (var m in actersList)
+                {
+                    if (a.CompareTo(m) == 0)
+                    {
+                        buffer = m;
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    actersList.Remove(buffer);//Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
+                    buffer = null;
+                }
+            }
+        }
+
         private bool MovieExists(int id)
         {
             return _context.Movies.Any(e => e.Id == id);

@@ -14,5 +14,6 @@ namespace MoviesApp.Services
         
         //относится ли этот сервис к актерам или фильмам
         IEnumerable<ActerDto> GetAllActorByMovieId(int id);
+        IEnumerable<ActerDto> GetNotFilmedActersByMovieId(int id);
     }
 }
