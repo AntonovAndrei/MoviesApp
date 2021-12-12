@@ -83,17 +83,17 @@ namespace MoviesApp.Services
 
         
         
-        public IEnumerable<ActerDto> GetAllActorByMovieId(int id)
+        public IEnumerable<ActerDto> GetAllActorByMovieId(int movieId)
         {
             return _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDto>>
-            (_context.ActerMovies.Where(m => m.MovieId == id)
+            (_context.ActerMovies.Where(m => m.MovieId == movieId)
                 .Select(m => m.Acter).ToList());
         }
 
-        public IEnumerable<ActerDtoForMovies> GetNotFilmedActersByMovieId(int id)
+        public IEnumerable<ActerDtoForMovies> GetNotFilmedActersByMovieId(int movieId)
         {
             var movieActersList = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDtoForMovies>>
-                (_context.ActerMovies.Where(a => a.MovieId == id).Select(a => a.Acter).ToList());
+                (_context.ActerMovies.Where(a => a.MovieId == movieId).Select(a => a.Acter).ToList());
 
             /*var actersList = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDtoForMovies>>
                 (_context.ActerMovies.Select(a => a.Acter).ToList());

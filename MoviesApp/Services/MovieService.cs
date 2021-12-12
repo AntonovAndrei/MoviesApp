@@ -81,13 +81,7 @@ namespace MoviesApp.Services
 
         public void DeleteAllActorsFilmedInMovies(int id)
         {
-            var deleteActer = _context.ActerMovies.Where(m => m.MovieId == id).ToList();
-            foreach (var am in deleteActer)
-            {
-                _context.ActerMovies.Remove(am);
-            }
-
-            _context.SaveChanges();
+            
         }
 
         public IEnumerable<MovieDto> GetAllMoviesByActorId(int id)

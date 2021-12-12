@@ -14,16 +14,18 @@ namespace MoviesApp.Controllers
 {
     public class MoviesController: Controller
     {
-        private readonly IMovieService _service;
+        private readonly IMovieService _movieService;
         private readonly IActorService _actorService;
+        private readonly IActorMovieService _actorMovieService;
         private readonly ILogger<HomeController> _logger;
         private readonly Mapper _mapper;
 
 
-        public MoviesController(IActorService actorService, IMovieService service, ILogger<HomeController> logger, Mapper mapper)
+        public MoviesController(IActorMovieService actorMovieService, IActorService actorService, IMovieService movieService, ILogger<HomeController> logger, Mapper mapper)
         {
+            _actorMovieService = actorMovieService;
             _actorService = actorService;
-            _service = service;
+            _movieService = movieService;
             _logger = logger;
             _mapper = mapper;
         }
@@ -32,7 +34,7 @@ namespace MoviesApp.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_service.GetAllMovies());
+            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_movieService.GetAllMovies());
             return View(movies);
         }
 
@@ -45,7 +47,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
             
-            var viewModel = _mapper.Map<MovieViewModel>(_service.GetMovie((int) id));
+            var viewModel = _mapper.Map<MovieViewModel>(_movieService.GetMovie((int) id));
 
             if (viewModel == null)
             {
@@ -66,8 +68,6 @@ namespace MoviesApp.Controllers
         }
 
         // POST: Movies/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
@@ -75,7 +75,7 @@ namespace MoviesApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _service.AddMovie(_mapper.Map<MovieDto>(inputModel));
+                _movieService.AddMovie(_mapper.Map<MovieDto>(inputModel));
                 return RedirectToAction(nameof(Index));
             }
             return View(inputModel);
@@ -90,7 +90,7 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var editModel = _mapper.Map<EditMovieViewModel>(_service.GetMovie((int) id));
+            var editModel = _mapper.Map<EditMovieViewModel>(_movieService.GetMovie((int) id));
             
             if (editModel == null)
             {
@@ -103,8 +103,6 @@ namespace MoviesApp.Controllers
         }
 
         // POST: Movies/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
@@ -112,14 +110,14 @@ namespace MoviesApp.Controllers
         {
             if (editModel.IsDeleteAllActer)
             {
-                _service.DeleteAllActorsFilmedInMovies(id);
+                _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
             }
             //так нужно обрабатывать все ошибки выкидываемые сервисом?
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _service.UpdateMovie(_mapper.Map<EditMovieViewModel, MovieDto>(editModel));
+                    _movieService.UpdateMovie(_mapper.Map<EditMovieViewModel, MovieDto>(editModel));
                 }
                 catch (DbUpdateException)
                 {
@@ -137,7 +135,7 @@ namespace MoviesApp.Controllers
                 {
                     foreach (var a in acterIds)
                     {
-                        
+                        _actorMovieService.
                     }
                 }
                 

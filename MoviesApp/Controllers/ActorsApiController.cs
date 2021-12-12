@@ -34,7 +34,8 @@ namespace MoviesApp.Controllers
         [ProducesResponseType(404)]
         public ActionResult<IEnumerable<ActerViewModel>> GetActers()
         {
-            var acters = _mapper.Map<IEnumerable<ActerDto>, IEnumerable<ActerViewModel>>(_service.GetAllActors());
+            var acters = _mapper.Map<IEnumerable<ActerDto>, IEnumerable<ActerViewModel>>
+                (_service.GetAllActors());
             return Ok(acters);
         }
         
@@ -47,7 +48,8 @@ namespace MoviesApp.Controllers
         {
             var acter = _mapper.Map<EditActerViewModel>(_service.GetActor(id));
             if (acter == null) return NotFound();
-            acter.SelectMovies = _mapper.Map<IEnumerable<MovieDto>,IEnumerable<ActerMovieViewModel>>(_service.GetAllMoviesByActorId(id));
+            acter.SelectMovies = _mapper.Map<IEnumerable<MovieDto>,IEnumerable<ActerMovieViewModel>>
+                (_service.GetAllMoviesByActorId(id));
             return Ok(acter);
         }
         
