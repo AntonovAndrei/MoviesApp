@@ -117,7 +117,7 @@ namespace MoviesApp.Services
 
                 if (buffer != null)
                 {
-                    actersList.Remove(buffer);//Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
+                    actersList.Remove(buffer);
                     buffer = null;
                 }
             }

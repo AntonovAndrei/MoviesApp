@@ -8,7 +8,7 @@ using MoviesApp.Services.Dto;
 
 namespace MoviesApp.Services
 {
-    public class MovieService:IMovieService
+    public class MovieService: IMovieService
     {
         private readonly MoviesContext _context;
         private readonly IMapper _mapper;
@@ -77,11 +77,6 @@ namespace MoviesApp.Services
             _context.SaveChanges();
             
             return _mapper.Map<MovieDto>(movie);
-        }
-
-        public void DeleteAllActorsFilmedInMovies(int id)
-        {
-            
         }
 
         public IEnumerable<MovieDto> GetAllMoviesByActorId(int id)

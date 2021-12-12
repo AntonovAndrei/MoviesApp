@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore.Internal;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services.Dto;
@@ -29,16 +28,10 @@ namespace MoviesApp.Services
 
         public ActerMovieDto DeleteActerMoviesLink(ActerMovieDto acterMovieDto)
         {
-            try
-            {
-                var link = _context.Remove(_mapper.Map<ActerMovieDto, ActerMovie>(acterMovieDto)).Entity;
-                _context.SaveChanges();
-                return _mapper.Map<ActerMovie, ActerMovieDto>(link);
-            }
-            catch
-            {
-                throw ;
-            }
+            var link = _context.Remove(_mapper.Map<ActerMovieDto, ActerMovie>(acterMovieDto)).Entity;
+            _context.SaveChanges();
+            return _mapper.Map<ActerMovie, ActerMovieDto>(link);
+            
         }
 
         public IEnumerable<ActerMovieDto> DeleteAllActorsFilmedInMovieByMovieId(int movieId)
@@ -52,6 +45,12 @@ namespace MoviesApp.Services
 
             return _mapper.Map<IEnumerable<ActerMovie>, IEnumerable<ActerMovieDto>>(deleteActer);
         }
-        
+
+        public IEnumerable<ActerMovieDto> AddActerMovieLinks(IEnumerable<ActerMovieDto> acterMovieDto)
+        {
+            var links = _context.Remove(_mapper.Map<IEnumerable<ActerMovieDto>, IEnumerable<ActerMovie>>(acterMovieDto)).Entity;
+            _context.SaveChanges();
+            return _mapper.Map<IEnumerable<ActerMovie>, IEnumerable<ActerMovieDto>>(links);
+        }
     }
 }

@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MoviesApp.Filters;
-using MoviesApp.Models;
 using MoviesApp.Services;
 using MoviesApp.Services.Dto;
 using MoviesApp.ViewModels;
@@ -112,31 +110,27 @@ namespace MoviesApp.Controllers
             {
                 _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
             }
-            //так нужно обрабатывать все ошибки выкидываемые сервисом?
+            
             if (ModelState.IsValid)
             {
-                try
+                var movie = _mapper.Map<EditMovieViewModel, MovieDto>(editModel);
+                movie.Id = id;
+                var result = _movieService.UpdateMovie(movie);
+                
+                if (result == null)
                 {
-                    _movieService.UpdateMovie(_mapper.Map<EditMovieViewModel, MovieDto>(editModel));
+                    return NotFound();
                 }
-                catch (DbUpdateException)
-                {
-                    if (!MovieExists(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
+                
                 if (acterIds.Length > 0)
                 {
+                    List<ActerMovieDto> links = new List<ActerMovieDto>();
                     foreach (var a in acterIds)
                     {
-                        _actorMovieService.
+                        links.Add(new ActerMovieDto(){ActerId = a, MovieId = id});
                     }
+
+                    _actorMovieService.AddActerMovieLinks(links);
                 }
                 
                 return RedirectToAction(nameof(Index));
@@ -153,18 +147,14 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var deleteModel = _context.Movies.Where(m => m.Id == id).Select(m => new DeleteMovieViewModel
-            {
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
+            var deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_movieService.DeleteMovie((int) id));
             
             if (deleteModel == null)
             {
                 return NotFound();
             }
+
+            _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId((int) id);
 
             return View(deleteModel);
         }
@@ -174,16 +164,17 @@ namespace MoviesApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var movie = _context.Movies.Find(id);
-            _context.Movies.Remove(movie);
-            _context.SaveChanges();
-            _logger.LogError($"Movie with id {movie.Id} has been deleted!");
+            var movie = _movieService.DeleteMovie(id);
+            if (movie==null)
+            {
+                return NotFound();
+            }
+            
+            _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId((int) id);
+            
+            _logger.LogTrace($"Movie with id {movie.Id} has been deleted!\n" +
+                             $"");
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool MovieExists(int id)
-        {
-            return _context.Movies.Any(e => e.Id == id);
         }
     }
 }
