@@ -106,11 +106,6 @@ namespace MoviesApp.Controllers
         [EnsureReleaseDateBeforeNow]
         public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, List<int> acterIds)
         {
-            if (editModel.IsDeleteAllActer)
-            {
-                _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
-            }
-            
             if (ModelState.IsValid)
             {
                 var movie = _mapper.Map<EditMovieViewModel, MovieDto>(editModel);
@@ -122,9 +117,9 @@ namespace MoviesApp.Controllers
                     return NotFound();
                 }
 
-                for (int i = 0; i < acterIds.Count; i++)
+                if (editModel.IsDeleteAllActer)
                 {
-                    Console.WriteLine($"acterIds[i] = {acterIds[i]}");
+                    _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
                 }
                 
                 if (acterIds.Count > 0)
@@ -132,7 +127,6 @@ namespace MoviesApp.Controllers
                     List<ActerMovieDto> links = new List<ActerMovieDto>();
                     foreach (var a in acterIds)
                     {
-                        Console.WriteLine($"actorId№ {a} added with movieId№ {id}");
                         links.Add(new ActerMovieDto(){ActerId = a, MovieId = id});
                     }
 
@@ -174,7 +168,7 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-            Console.WriteLine("suda ne doslo");
+            
             _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
             
             _logger.LogTrace($"Movie with id {movie.Id} has been deleted!\n" +

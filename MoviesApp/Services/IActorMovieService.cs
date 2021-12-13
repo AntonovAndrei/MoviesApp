@@ -8,6 +8,7 @@ namespace MoviesApp.Services.Dto
         ActerMovieDto AddActerMoviesLink(ActerMovieDto acterMovieDto);
         ActerMovieDto DeleteActerMoviesLink(ActerMovieDto acterMovieDto);
         IEnumerable<ActerMovieDto> DeleteAllActorsFilmedInMovieByMovieId(int movieId);
+        IEnumerable<ActerMovieDto> DeleteAllMoviesWhereFilmedActorByActorId(int actorId);
         IEnumerable<ActerMovieDto> AddActerMovieLinks(IEnumerable<ActerMovieDto> acterMovieDto);
 
     }

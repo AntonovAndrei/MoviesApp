@@ -13,6 +13,7 @@ namespace MoviesApp.Models.AutoMapperProfiles
             CreateMap<MovieDto, EditMovieViewModel>().ReverseMap();
             CreateMap<MovieDto, MovieViewModel>().ReverseMap();
             CreateMap<MovieDto, ActerMovieViewModel>();
+            CreateMap<MovieDtoForActer, ActerMovieViewModel>();
         }
     }
 }

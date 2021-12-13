@@ -46,6 +46,18 @@ namespace MoviesApp.Services
             return _mapper.Map<IEnumerable<ActerMovie>, IEnumerable<ActerMovieDto>>(deleteActer);
         }
 
+        public IEnumerable<ActerMovieDto> DeleteAllMoviesWhereFilmedActorByActorId(int actorId)
+        {
+            var deleteLinks = _context.ActerMovies.Where(m => m.ActerId == actorId).ToList();
+            foreach (var am in deleteLinks)
+            {
+                _context.ActerMovies.Remove(am);
+            }
+            _context.SaveChanges();
+
+            return _mapper.Map<IEnumerable<ActerMovie>, IEnumerable<ActerMovieDto>>(deleteLinks);
+        }
+
         public IEnumerable<ActerMovieDto> AddActerMovieLinks(IEnumerable<ActerMovieDto> acterMovieDto)
         {
             var links = _mapper.Map<IEnumerable<ActerMovieDto>, IEnumerable<ActerMovie>>(acterMovieDto);

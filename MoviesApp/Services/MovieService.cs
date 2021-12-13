@@ -85,7 +85,39 @@ namespace MoviesApp.Services
             (_context.ActerMovies.Where(m => m.ActerId == id)
                 .Select(m => m.Movie).ToList());
         }
-        
+
+        public IEnumerable<MovieDtoForActer> GetActersNotFilmedFilmsByActerId(int acterId)
+        {
+            var acterMoviesList = _mapper.Map<IEnumerable<Movie>, IEnumerable<MovieDtoForActer>>
+                (_context.ActerMovies.Where(a => a.ActerId == acterId).Select(a => a.Movie).ToList());
+
+            //Сделанно, чтобы юзать метод Remove
+            //скорее всего есть метод получше
+            var moviesList = _mapper.Map<List<Movie>, List<MovieDtoForActer>>
+                (_context.Movies.ToList());
+
+            var buffer = new MovieDtoForActer();
+            foreach (var a in acterMoviesList)
+            {
+                foreach (var m in moviesList)
+                {
+                    if (a.CompareTo(m))
+                    {
+                        buffer = m;
+                        break;
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    moviesList.Remove(buffer);
+                    buffer = null;
+                }
+            }
+
+            return moviesList;
+        }
+
         private bool MovieExists(int id)
         {
             return _context.Movies.Any(e => e.Id == id);
