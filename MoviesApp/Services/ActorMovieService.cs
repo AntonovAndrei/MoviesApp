@@ -48,7 +48,12 @@ namespace MoviesApp.Services
 
         public IEnumerable<ActerMovieDto> AddActerMovieLinks(IEnumerable<ActerMovieDto> acterMovieDto)
         {
-            var links = _context.Remove(_mapper.Map<IEnumerable<ActerMovieDto>, IEnumerable<ActerMovie>>(acterMovieDto)).Entity;
+            var links = _mapper.Map<IEnumerable<ActerMovieDto>, IEnumerable<ActerMovie>>(acterMovieDto);
+            foreach (var l in links)
+            {
+                _context.ActerMovies.Add(l);
+            }
+            
             _context.SaveChanges();
             return _mapper.Map<IEnumerable<ActerMovie>, IEnumerable<ActerMovieDto>>(links);
         }

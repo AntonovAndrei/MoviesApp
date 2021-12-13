@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -95,14 +96,26 @@ namespace MoviesApp.Services
             var movieActersList = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDtoForMovies>>
                 (_context.ActerMovies.Where(a => a.MovieId == movieId).Select(a => a.Acter).ToList());
 
+            /*Console.WriteLine("vse actoru snimavshiesya v filme");
+            foreach (var a in movieActersList)
+            {
+                Console.WriteLine($"{a.Id} - {a.Name}");
+            }*/
+            
             /*var actersList = _mapper.Map<IEnumerable<Acter>, IEnumerable<ActerDtoForMovies>>
                 (_context.ActerMovies.Select(a => a.Acter).ToList());
                 */
-
             //Сделанно, чтобы юзать метод Remove
             //скорее всего есть метод получше
             var actersList = _mapper.Map<List<Acter>, List<ActerDtoForMovies>>
-                (_context.ActerMovies.Select(a => a.Acter).ToList());
+                (_context.Acters.ToList());
+            
+            /*Console.WriteLine("vse actoru");
+
+            foreach (var a in actersList)
+            {
+                Console.WriteLine($"{a.Id} - {a.Name}");
+            }*/
             
             var buffer = new ActerDtoForMovies();
             foreach (var a in movieActersList)
@@ -112,6 +125,7 @@ namespace MoviesApp.Services
                     if (a.CompareTo(m))
                     {
                         buffer = m;
+                        break;
                     }
                 }
 

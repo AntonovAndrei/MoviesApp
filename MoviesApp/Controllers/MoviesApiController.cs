@@ -23,7 +23,7 @@ namespace MoviesApp.Controllers
         [HttpGet] // GET: /api/movies
         [ProducesResponseType(200, Type = typeof(IEnumerable<MovieViewModel>))]  
         [ProducesResponseType(404)]
-        public ActionResult<IEnumerable<MovieViewModel>> GetMovies()
+        public ActionResult<IEnumerable<MovieDto>> GetMovies()
         {
             return Ok(_service.GetAllMovies());
         }
@@ -39,7 +39,7 @@ namespace MoviesApp.Controllers
         }
         
         [HttpPost] // POST: api/movies
-        public ActionResult<InputMovieViewModel> PostMovie(MovieDto inputDto)
+        public ActionResult<MovieDto> PostMovie(MovieDto inputDto)
         {
             var movie = _service.AddMovie(inputDto);
             return CreatedAtAction("GetById", new { id = movie.Id }, movie);
@@ -59,7 +59,7 @@ namespace MoviesApp.Controllers
         }
         
         [HttpDelete("{id}")] // DELETE: api/movie/5
-        public ActionResult<DeleteMovieViewModel> DeleteMovie(int id)
+        public ActionResult<MovieDto> DeleteMovie(int id)
         {
             var movie = _service.DeleteMovie(id);
             if (movie == null) return NotFound();  

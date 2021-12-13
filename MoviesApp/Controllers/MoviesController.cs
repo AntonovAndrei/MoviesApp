@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,10 @@ namespace MoviesApp.Controllers
         private readonly IActorService _actorService;
         private readonly IActorMovieService _actorMovieService;
         private readonly ILogger<HomeController> _logger;
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
 
-        public MoviesController(IActorMovieService actorMovieService, IActorService actorService, IMovieService movieService, ILogger<HomeController> logger, Mapper mapper)
+        public MoviesController(IActorMovieService actorMovieService, IActorService actorService, IMovieService movieService, ILogger<HomeController> logger, IMapper mapper)
         {
             _actorMovieService = actorMovieService;
             _actorService = actorService;
@@ -46,7 +47,6 @@ namespace MoviesApp.Controllers
             }
             
             var viewModel = _mapper.Map<MovieViewModel>(_movieService.GetMovie((int) id));
-
             if (viewModel == null)
             {
                 return NotFound();
@@ -104,7 +104,7 @@ namespace MoviesApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
-        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, int[] acterIds)
+        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, List<int> acterIds)
         {
             if (editModel.IsDeleteAllActer)
             {
@@ -121,12 +121,18 @@ namespace MoviesApp.Controllers
                 {
                     return NotFound();
                 }
+
+                for (int i = 0; i < acterIds.Count; i++)
+                {
+                    Console.WriteLine($"acterIds[i] = {acterIds[i]}");
+                }
                 
-                if (acterIds.Length > 0)
+                if (acterIds.Count > 0)
                 {
                     List<ActerMovieDto> links = new List<ActerMovieDto>();
                     foreach (var a in acterIds)
                     {
+                        Console.WriteLine($"actorId№ {a} added with movieId№ {id}");
                         links.Add(new ActerMovieDto(){ActerId = a, MovieId = id});
                     }
 
@@ -147,17 +153,16 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_movieService.DeleteMovie((int) id));
+            var deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_movieService.GetMovie((int) id));
             
             if (deleteModel == null)
             {
                 return NotFound();
             }
-
-            _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId((int) id);
-
+            
             return View(deleteModel);
         }
+        
         
         // POST: Movies/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -169,8 +174,8 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-            
-            _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId((int) id);
+            Console.WriteLine("suda ne doslo");
+            _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
             
             _logger.LogTrace($"Movie with id {movie.Id} has been deleted!\n" +
                              $"");
