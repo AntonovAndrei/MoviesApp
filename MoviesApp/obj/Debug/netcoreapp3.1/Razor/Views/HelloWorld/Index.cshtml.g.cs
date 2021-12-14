@@ -20,14 +20,28 @@ using MoviesApp;
 #line hidden
 #nullable disable
 #nullable restore
-#line 2 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
-using MoviesApp.Models;
+#line 3 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
+using MoviesApp.ViewModels;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 4 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
+using MoviesApp.ViewModels.AccountViewModel;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 5 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
+using MoviesApp.ViewModels.ManageViewModels;
 
 #line default
 #line hidden
 #nullable disable
     [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"9795396c2b96650065c4f41cde8a74292ed8345d", @"/Views/HelloWorld/Index.cshtml")]
-    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"877d25a15812243d81d33fda7be0eaf89850433e", @"/Views/_ViewImports.cshtml")]
+    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"685e2216f8228f900ae4ea5081b48bfd0818c02c", @"/Views/_ViewImports.cshtml")]
     public class Views_HelloWorld_Index : global::Microsoft.AspNetCore.Mvc.Razor.RazorPage<dynamic>
     {
         #pragma warning disable 1998

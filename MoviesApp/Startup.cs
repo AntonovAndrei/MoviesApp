@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MoviesApp.Data;
 using MoviesApp.Middleware;
+using MoviesApp.Models;
 using MoviesApp.Services;
 using MoviesApp.Services.Dto;
 
@@ -32,6 +34,13 @@ namespace MoviesApp
 
             services.AddDbContext<MoviesContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("MoviesContext")));
+            
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    options.Password.RequireNonAlphanumeric = false;
+                })
+                .AddEntityFrameworkStores<MoviesContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>(TokenOptions.DefaultProvider);
             
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             
@@ -58,6 +67,7 @@ namespace MoviesApp
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             IList<CultureInfo> supportedCultures = new[]
