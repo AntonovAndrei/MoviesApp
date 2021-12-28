@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MoviesApp.Services.Dto
 {
-    public class MovieDtoForActer//: IComparable<MovieDtoForActer> ругается
+    public class MovieDtoForActer
     {
         public int? Id { get; set; }
         

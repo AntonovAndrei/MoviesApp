@@ -12,7 +12,6 @@ namespace MoviesApp.Services.Dto
         [ActorName]
         public string Name { get; set; }
 
-
         public bool CompareTo(ActerDtoForMovies acterDtoForMovies)
         {
             return this.Id == acterDtoForMovies.Id; 

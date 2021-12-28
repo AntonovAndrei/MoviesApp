@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MoviesApp.Models;
 using MoviesApp.Services;
 using MoviesApp.Services.Dto;
 using MoviesApp.ViewModels;
@@ -11,7 +9,6 @@ using MoviesApp.ViewModels;
 namespace MoviesApp.Controllers
 {
     [Route("api/acters")]
-    //[Route("api/[controller]/[action]", Name = "[controller]_[action]")]
     [ApiController]
     public class ActersApiController:ControllerBase
     {
@@ -40,7 +37,6 @@ namespace MoviesApp.Controllers
         
         
         [HttpGet("withMovies/{id}")] // GET: /api/acters
-        //[Route("api/acters/withMovies/{id}")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<ActerViewModel>))]  
         [ProducesResponseType(404)]
         public IActionResult GetActerWithMovies(int id)

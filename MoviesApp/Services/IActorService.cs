@@ -11,7 +11,6 @@ namespace MoviesApp.Services
         ActerDto AddActor(ActerDto actorDto);
         ActerDto DeleteActor(int id);
         
-        //относится ли этот сервис к актерам или фильмам
         IEnumerable<ActerDto> GetAllActorByMovieId(int movieId);
         IEnumerable<ActerDtoForMovies> GetNotFilmedActersByMovieId(int movieId);
     }

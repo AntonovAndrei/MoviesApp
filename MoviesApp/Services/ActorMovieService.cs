@@ -18,7 +18,6 @@ namespace MoviesApp.Services
             _mapper = mapper;
         }
         
-        //лучше сделать через ActerMovieDto или просто передавать id?
         public ActerMovieDto AddActerMoviesLink(ActerMovieDto acterMovieDto)
         {
             var link = _context.ActerMovies.Add(_mapper.Map<ActerMovieDto, ActerMovie>(acterMovieDto)).Entity;
