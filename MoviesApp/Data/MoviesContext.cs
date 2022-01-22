@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MoviesApp.Models;
 using MoviesApp.ViewModels;
 
 namespace MoviesApp.Data
 {
-    public class MoviesContext : DbContext
+    public class MoviesContext :  IdentityDbContext<ApplicationUser>
     {
         public MoviesContext (DbContextOptions<MoviesContext> options)
             : base(options)
@@ -22,6 +23,8 @@ namespace MoviesApp.Data
 
             modelBuilder.Entity<Acter>().Property(n => n.Name).IsRequired();
             modelBuilder.Entity<Acter>().Property(n => n.LastName).IsRequired();
+            
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

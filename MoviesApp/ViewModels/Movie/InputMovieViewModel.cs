@@ -18,6 +18,8 @@ namespace MoviesApp.ViewModels
 
         [Required] public string Genre { get; set; }
 
-        [Required] [Range(0, 999.99)] public decimal Price { get; set; }
+        [Required] 
+        [Range(0.00, 999.99)] 
+        public decimal Price { get; set; }
     }
 }

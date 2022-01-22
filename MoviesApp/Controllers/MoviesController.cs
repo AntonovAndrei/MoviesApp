@@ -1,41 +1,41 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MoviesApp.Data;
 using MoviesApp.Filters;
-using MoviesApp.Models;
+using MoviesApp.Services;
+using MoviesApp.Services.Dto;
 using MoviesApp.ViewModels;
 
 namespace MoviesApp.Controllers
 {
     public class MoviesController: Controller
     {
-        private readonly MoviesContext _context;
+        private readonly IMovieService _movieService;
+        private readonly IActorService _actorService;
+        private readonly IActorMovieService _actorMovieService;
         private readonly ILogger<HomeController> _logger;
+        private readonly IMapper _mapper;
 
 
-        public MoviesController(MoviesContext context, ILogger<HomeController> logger)
+        public MoviesController(IActorMovieService actorMovieService, IActorService actorService, IMovieService movieService, ILogger<HomeController> logger, IMapper mapper)
         {
-            _context = context;
+            _actorMovieService = actorMovieService;
+            _actorService = actorService;
+            _movieService = movieService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // GET: Movies
         [HttpGet]
         public IActionResult Index()
         {
-            return View(_context.Movies.Select(m => new MovieViewModel
-            {
-                Id = m.Id,
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).ToList());
+            var movies = _mapper.Map<IEnumerable<MovieDto>, IEnumerable<MovieViewModel>>(_movieService.GetAllMovies());
+            return View(movies);
         }
 
         // GET: Movies/Details/5
@@ -46,33 +46,15 @@ namespace MoviesApp.Controllers
             {
                 return NotFound();
             }
-
-            var viewModel = _context.Movies
-                .Where(m => m.Id == id)
-                .Select(m => new MovieViewModel
-            {
-                Id = m.Id,
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
-
             
+            var viewModel = _mapper.Map<MovieViewModel>(_movieService.GetMovie((int) id));
             if (viewModel == null)
             {
                 return NotFound();
             }
             
-            var movieActersList = _context.ActerMovies.Where(m => m.MovieId == id)
-                .Select(m => new InputActerViewModel()
-                {
-                    Name = m.Acter.Name,
-                    LastName = m.Acter.LastName,
-                    BirthdayDate = m.Acter.BirthdayDate,
-                })
-                .ToList();
-            ViewBag.MovieActersSelectedList = movieActersList;
+            ViewBag.MovieActersSelectedList = _mapper.Map<IEnumerable<ActerDto>, IEnumerable<InputActerViewModel>>
+                (_actorService.GetAllActorByMovieId((int) id));
 
             return View(viewModel);
         }
@@ -85,8 +67,6 @@ namespace MoviesApp.Controllers
         }
 
         // POST: Movies/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
@@ -94,21 +74,14 @@ namespace MoviesApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(new Movie
-                {
-                    Genre = inputModel.Genre,
-                    Price = inputModel.Price,
-                    Title = inputModel.Title,
-                    ReleaseDate = inputModel.ReleaseDate
-                });
-                _context.SaveChanges();
-
+                _movieService.AddMovie(_mapper.Map<MovieDto>(inputModel));
                 return RedirectToAction(nameof(Index));
             }
             return View(inputModel);
         }
         
         [HttpGet]
+        [Authorize(Roles="admin")]
         // GET: Movies/Edit/5
         public IActionResult Edit(int? id)
         {
@@ -117,115 +90,50 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var editModel = _context.Movies.Where(m => m.Id == id).Select(m => new EditMovieViewModel
-            {
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
+            var editModel = _mapper.Map<EditMovieViewModel>(_movieService.GetMovie((int) id));
             
             if (editModel == null)
             {
                 return NotFound();
             }
             
-            var movieActerList = _context.ActerMovies.Where(a => a.MovieId == id).Select(m => new MovieActerViewModel()
-            {
-                Id = m.Acter.Id,
-                Name = m.Acter.Name
-            }).ToList();
-
-            var actersList = _context.Acters
-                .Select(m => new MovieActerViewModel
-                {
-                    Id = m.Id,
-                    Name = m.Name
-                }).ToList();
-            
-            var buffer = new MovieActerViewModel();
-            foreach (var a in movieActerList)
-            {
-                foreach (var m in actersList)
-                {
-                    if (a.CompareTo(m) == 0)
-                    {
-                        buffer = m;
-                    }
-                }
-
-                if (buffer != null)
-                {
-                    actersList.Remove(buffer);
-                    //Console.WriteLine($"elemet deleted m {buffer.Id} - {buffer.Name}");
-                    buffer = null;
-                }
-            }
-
-
-            ViewBag.ActersSelectList = new SelectList(actersList, "Id", "Name");
+            ViewBag.ActersSelectList = new SelectList(_actorService.GetNotFilmedActersByMovieId((int) id), "Id", "Name");
 
             return View(editModel);
         }
 
         // POST: Movies/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles="admin")]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
-        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, int[] acterId)
+        public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, List<int> acterIds)
         {
-            if (editModel.IsDeleteAllActer)
-            {
-                var deleteActer = _context.ActerMovies.Where(m => m.MovieId == id).ToList();
-                foreach (var am in deleteActer)
-                {
-                    _context.Remove(am);
-                }
-
-                _context.SaveChanges();
-            }
             if (ModelState.IsValid)
             {
-                try
+                var movie = _mapper.Map<EditMovieViewModel, MovieDto>(editModel);
+                movie.Id = id;
+                var result = _movieService.UpdateMovie(movie);
+                
+                if (result == null)
                 {
-                    var movie = new Movie
-                    {
-                        Id = id,
-                        Genre = editModel.Genre,
-                        Price = editModel.Price,
-                        Title = editModel.Title,
-                        ReleaseDate = editModel.ReleaseDate
-                    };
-                    
-                    _context.Update(movie);
-                    _context.SaveChanges();
-                }
-                catch (DbUpdateException)
-                {
-                    if (!MovieExists(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
 
-                if (acterId.Length > 0)
+                if (editModel.IsDeleteAllActer)
                 {
-                    foreach (var a in acterId)
+                    _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
+                }
+                
+                if (acterIds.Count > 0)
+                {
+                    List<ActerMovieDto> links = new List<ActerMovieDto>();
+                    foreach (var a in acterIds)
                     {
-                        _context.Add(new ActerMovie
-                        {
-                            MovieId = id, 
-                            ActerId = a
-                        });
+                        links.Add(new ActerMovieDto(){ActerId = a, MovieId = id});
                     }
 
-                    _context.SaveChanges();
+                    _actorMovieService.AddActerMovieLinks(links);
                 }
                 
                 return RedirectToAction(nameof(Index));
@@ -242,37 +150,33 @@ namespace MoviesApp.Controllers
                 return NotFound();
             }
 
-            var deleteModel = _context.Movies.Where(m => m.Id == id).Select(m => new DeleteMovieViewModel
-            {
-                Genre = m.Genre,
-                Price = m.Price,
-                Title = m.Title,
-                ReleaseDate = m.ReleaseDate
-            }).FirstOrDefault();
+            var deleteModel = _mapper.Map<MovieDto, DeleteMovieViewModel>(_movieService.GetMovie((int) id));
             
             if (deleteModel == null)
             {
                 return NotFound();
             }
-
+            
             return View(deleteModel);
         }
+        
         
         // POST: Movies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var movie = _context.Movies.Find(id);
-            _context.Movies.Remove(movie);
-            _context.SaveChanges();
-            _logger.LogError($"Movie with id {movie.Id} has been deleted!");
+            var movie = _movieService.DeleteMovie(id);
+            if (movie==null)
+            {
+                return NotFound();
+            }
+            
+            _actorMovieService.DeleteAllActorsFilmedInMovieByMovieId(id);
+            
+            _logger.LogTrace($"Movie with id {movie.Id} has been deleted!\n" +
+                             $"");
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool MovieExists(int id)
-        {
-            return _context.Movies.Any(e => e.Id == id);
         }
     }
 }

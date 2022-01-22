@@ -1,4 +1,4 @@
-﻿@model MoviesApp.ViewModels.EditActerViewModel
+﻿@model EditActerViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -17,22 +17,32 @@
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
+                </div>
             <div class="form-group">
                 <label asp-for="LastName" class="control-label"></label>
                 <input asp-for="LastName" class="form-control" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
+                </div>
             <div class="form-group">
                 <label asp-for="BirthdayDate" class="control-label"></label>
                 <input asp-for="BirthdayDate" class="form-control" />
                 <span asp-validation-for="BirthdayDate" class="text-danger"></span>
             </div>
+            @*Не работает с кастомной валидацией на имя и фамилию*@
+            @*<div class="form-group">
+                <label class="control-label"> Movies </label>
+                @Html.DropDownList("movieId", ViewBag.MoviesSelectList as MultiSelectList, new {multiple = "multiple", @class = "form-select"})
+                </div>*@
+            @*Не работает с кастомной валидацией на имя и фамилию*@
             <div class="form-group">
-                <label  class="control-label"> Movies </label>
-                @Html.DropDownList("movieId", ViewBag.MoviesSelectList as SelectList, new { multiple = "multiple", @class ="form-select"})
-                @*@Html.ListBox("movieId", ViewBag.MoviesSelectList as MultiSelectList )*@
-            </div>
+                <label class="control-label"> Movies </label>
+                <select name="movieId" multiple>
+                @foreach (var m in Model.SelectMovies)
+                {
+                        <option value="@m.Id">@m.Title</option>
+                }
+                </select>
+                </div>
             <div class="form-group">
                 <label  class="control-label"> Remove all movies </label>
                 <input asp-for="@Model.IsDeleteAllMovies" />

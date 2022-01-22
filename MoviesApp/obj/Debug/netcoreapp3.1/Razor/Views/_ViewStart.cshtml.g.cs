@@ -21,13 +21,27 @@ using MoviesApp;
 #nullable disable
 #nullable restore
 #line 2 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
-using MoviesApp.Models;
+using MoviesApp.ViewModels;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 3 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
+using MoviesApp.ViewModels.AccountViewModel;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 4 "C:\Users\Андрей\Desktop\ASP.NET\MoviesApp\MoviesApp\Views\_ViewImports.cshtml"
+using MoviesApp.ViewModels.ManageViewModels;
 
 #line default
 #line hidden
 #nullable disable
     [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"101e29c025b7c28de6c86dbd7d29a3dfadd7316b", @"/Views/_ViewStart.cshtml")]
-    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"877d25a15812243d81d33fda7be0eaf89850433e", @"/Views/_ViewImports.cshtml")]
+    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"bc2cd201e6732e97b437ce958baf24d16bcbc752", @"/Views/_ViewImports.cshtml")]
     public class Views__ViewStart : global::Microsoft.AspNetCore.Mvc.Razor.RazorPage<dynamic>
     {
         #pragma warning disable 1998
