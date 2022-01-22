@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
@@ -80,6 +81,7 @@ namespace MoviesApp.Controllers
         }
         
         [HttpGet]
+        [Authorize(Roles="admin")]
         // GET: Movies/Edit/5
         public IActionResult Edit(int? id)
         {
@@ -102,6 +104,7 @@ namespace MoviesApp.Controllers
 
         // POST: Movies/Edit/5
         [HttpPost]
+        [Authorize(Roles="admin")]
         [ValidateAntiForgeryToken]
         [EnsureReleaseDateBeforeNow]
         public IActionResult Edit(int id, [Bind("Title,ReleaseDate,Genre,Price,IsDeleteAllActer")] EditMovieViewModel editModel, List<int> acterIds)
